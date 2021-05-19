@@ -2,7 +2,7 @@ function tor {
   local port local_port existing_port option value status
   checkroot
   checkargn $# 3
-  #check_missing_packages "tor" "curl"
+  check_missing_binaries "tor" "curl"
   tordir="/usr/local/etc/tor/torrc"
 
   if { [ ! -d "/var/lib/tor/treehouses" ] || [ ! -f "/var/lib/tor/treehouses/hostname" ]; } && [ "$1" != "start" ] && [ "$1" != "add" ]; then
