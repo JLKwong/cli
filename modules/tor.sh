@@ -5,8 +5,9 @@ function tor {
   check_missing_binary "tor"
   check_missing_binary "curl"
   tordir="/usr/local/etc/tor/torrc"
+  tortree="/usr/local/var/lib/tor"
 
-  if { [ ! -d "/var/lib/tor/treehouses" ] || [ ! -f "/var/lib/tor/treehouses/hostname" ]; } && [ "$1" != "start" ] && [ "$1" != "add" ]; then
+  if { [ ! -d "/var/lib/tor/treehouses" ] || [ ! -f "$tortree" ]; } && [ "$1" != "start" ] && [ "$1" != "add" ]; then
     if [ -z "$(grep -Poi "^HiddenServicePort \\K(.*) 127.0.0.1:(.*)\\b" $tordir | tac | sed -r 's/(.*?)127.0.0.1:(.*?)/\1 <=> \2/g')" ]; then
       echo "Error: there are no tor ports added."
       echo "'$BASENAME add [localPort]' to add a port and be able to use the service"
@@ -18,7 +19,7 @@ function tor {
   fi
 
   if [ -z "$1" ]; then
-    cat "/var/lib/tor/treehouses/hostname"
+    cat "$tortree"
     exit 0
   fi
 
@@ -182,7 +183,7 @@ function tor {
           echo "OK."
           ;;
         now)
-          line1=$(</var/lib/tor/treehouses/hostname)
+          line1=$(<$tortree)
           line2=$(grep ^HiddenServicePort $tordir | cut -f 2- -d ' ' | sed -r 's/(.*?) 127.0.0.1:(.*?)/\1:\2/g' | tac | tr -d '\n')
           line3="\`$(date -u +"%Y-%m-%d %H:%M:%S %Z")\` $(treehouses networkmode)"
           feedback "$line1\n$line2\n$line3"
