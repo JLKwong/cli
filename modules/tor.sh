@@ -3,7 +3,7 @@ function tor {
   checkroot
   checkargn $# 3
   check_missing_packages "tor" "curl"
-  tordir="/usr/local/etc/tor/torrc.sample"
+  tordir="/usr/local/etc/tor/torrc"
 
   if { [ ! -d "/var/lib/tor/treehouses" ] || [ ! -f "/var/lib/tor/treehouses/hostname" ]; } && [ "$1" != "start" ] && [ "$1" != "add" ]; then
     if [ -z "$(grep -Poi "^HiddenServicePort \\K(.*) 127.0.0.1:(.*)\\b" $tordir | tac | sed -r 's/(.*?)127.0.0.1:(.*?)/\1 <=> \2/g')" ]; then
