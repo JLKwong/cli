@@ -102,7 +102,8 @@ function tor {
       ;;
 
     stop)
-      stop_service tor
+      #stop_service tor
+      brew services stop tor
       echo "Success: the tor service has been stopped"
       ;;
 
@@ -117,12 +118,14 @@ function tor {
         echo "HiddenServiceDir /var/lib/tor/treehouses" >> $tordir
       fi
 
-      start_service tor
+      #start_service tor
+      brew services start tor
       echo "Success: the tor service has been started"
       ;;
 
     destroy)
-      stop_service tor
+      #stop_service tor
+      brew services stop tor
       echo > $tordir
       rm -rf /var/lib/tor/treehouses
 
