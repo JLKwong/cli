@@ -68,7 +68,9 @@ function tor {
         echo "HiddenServicePort $port 127.0.0.1:$local_port " >> $tordir
       fi
 
-      restart_service tor
+      #restart_service tor
+      brew services stop tor
+      brew services start tor
       echo "Success: the port has been added"
       ;;
 
@@ -87,7 +89,9 @@ function tor {
       fi
 
       sed -i "/^HiddenServicePort $2 /d" $tordir
-      restart_service tor
+      #restart_service tor
+      brew services stop tor
+      brew services start tor
       echo "Port $2 has been deleted"
       ;;
 
@@ -97,7 +101,9 @@ function tor {
       fi
 
       sed -i "/^HiddenServicePort /d" $tordir
-      restart_service tor
+      #restart_service tor
+      brew services stop tor
+      brew services start tor
       echo "All ports have been deleted"
       ;;
 
