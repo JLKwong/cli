@@ -207,12 +207,12 @@ function start_spinner() {
            led clone restore burn services speedtest usb
            tor sshkey config"
   carg="$(echo $SCRIPTARGS | cut -d' ' -f1)"
-  if [[ $tree == *"python"* ]] || [[ $tree == *"cron"* ]] || \
-     [[ $tree == *"provisioner"* ]] || [[ $tree == *"runner"* ]] || [[ ! "$cstring" == *"$carg"* ]]
-  then
+  #if [[ $tree == *"python"* ]] || [[ $tree == *"cron"* ]] || \
+     #[[ $tree == *"provisioner"* ]] || [[ $tree == *"runner"* ]] || [[ ! "$cstring" == *"$carg"* ]]
+  #then
     NOSPIN=1
     return
-  fi
+  #fi
   set -m
   trap kill_spinner {0..15} SIGTSTP
   spinner &
