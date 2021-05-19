@@ -2,10 +2,11 @@ function tor {
   local port local_port existing_port option value status
   checkroot
   checkargn $# 3
-  #check_missing_packages "tor" "curl"
+  check_missing_packages "tor" "curl"
+  tordir="/usr/local/etc/tor/torrc.sample"
 
   if { [ ! -d "/var/lib/tor/treehouses" ] || [ ! -f "/var/lib/tor/treehouses/hostname" ]; } && [ "$1" != "start" ] && [ "$1" != "add" ]; then
-    if [ -z "$(grep -Poi "^HiddenServicePort \\K(.*) 127.0.0.1:(.*)\\b" /usr/local/etc/tor/torrc.sample | tac | sed -r 's/(.*?)127.0.0.1:(.*?)/\1 <=> \2/g')" ]; then
+    if [ -z "$(grep -Poi "^HiddenServicePort \\K(.*) 127.0.0.1:(.*)\\b" $tordir | tac | sed -r 's/(.*?)127.0.0.1:(.*?)/\1 <=> \2/g')" ]; then
       echo "Error: there are no tor ports added."
       echo "'$BASENAME add [localPort]' to add a port and be able to use the service"
     else
@@ -23,11 +24,11 @@ function tor {
   case "$1" in
     list)
       echo "external <=> local"
-      grep -Poi "^HiddenServicePort \\K(.*) 127.0.0.1:(.*)\\b" /usr/local/etc/tor/torrc.sample | tac | sed -r 's/(.*?)127.0.0.1:(.*?)/\1 <=> \2/g'
+      grep -Poi "^HiddenServicePort \\K(.*) 127.0.0.1:(.*)\\b" $tordir | tac | sed -r 's/(.*?)127.0.0.1:(.*?)/\1 <=> \2/g'
       ;;
 
     ports)
-      ports=$(grep -Poi "^HiddenServicePort \\K(.*) 127.0.0.1:(.*)\\b" /usr/local/etc/tor/torrc.sample | tac | sed -r 's/(.*?)127.0.0.1:(.*?)/\1 <=> \2/g' | sed "s/  <=> /:/g" | tr "\n" " " | sed "s/ $/\n/")
+      ports=$(grep -Poi "^HiddenServicePort \\K(.*) 127.0.0.1:(.*)\\b" $tordir | tac | sed -r 's/(.*?)127.0.0.1:(.*?)/\1 <=> \2/g' | sed "s/  <=> /:/g" | tr "\n" " " | sed "s/ $/\n/")
       if [[ $ports ]]; then
         echo $ports
       else
@@ -36,8 +37,8 @@ function tor {
       ;;
 
     add)
-      if ! grep -Pq "^HiddenServiceDir .*" "/usr/local/etc/tor/torrc.sample"; then
-        echo "HiddenServiceDir /var/lib/tor/treehouses" >> /usr/local/etc/tor/torrc.sample
+      if ! grep -Pq "^HiddenServiceDir .*" "$tordir"; then
+        echo "HiddenServiceDir /var/lib/tor/treehouses" >> $tordir
       fi
 
       port="$2"
@@ -59,11 +60,11 @@ function tor {
         log_and_exit1 "Error: is not a port"
       fi
 
-      existing_port=$(grep -Poi "^HiddenServicePort $port .*" /etc/tor/torrc)
+      existing_port=$(grep -Poi "^HiddenServicePort $port .*" $tordir)
       if [ ! -z "$existing_port" ]; then
-        sed -i "s/$existing_port/HiddenServicePort $port 127.0.0.1:$local_port/g" /etc/tor/torrc
+        sed -i "s/$existing_port/HiddenServicePort $port 127.0.0.1:$local_port/g" $tordir
       else
-        echo "HiddenServicePort $port 127.0.0.1:$local_port " >> /etc/tor/torrc
+        echo "HiddenServicePort $port 127.0.0.1:$local_port " >> $tordir
       fi
 
       restart_service tor
@@ -79,12 +80,12 @@ function tor {
         log_and_exit1 "Error: $2 is not a port"
       fi
 
-      if ! grep -wq "HiddenServicePort $2" /etc/tor/torrc ; then
+      if ! grep -wq "HiddenServicePort $2" $tordir ; then
         echo "Port $2 is not assigned"
         exit 0
       fi
 
-      sed -i "/^HiddenServicePort $2 /d" /etc/tor/torrc
+      sed -i "/^HiddenServicePort $2 /d" $tordir
       restart_service tor
       echo "Port $2 has been deleted"
       ;;
@@ -94,7 +95,7 @@ function tor {
         log_and_exit1 "Error: wrong syntax"
       fi
 
-      sed -i "/^HiddenServicePort /d" /etc/tor/torrc
+      sed -i "/^HiddenServicePort /d" $tordir
       restart_service tor
       echo "All ports have been deleted"
       ;;
@@ -111,8 +112,8 @@ function tor {
         chmod 700 /var/lib/tor/treehouses
       fi
 
-      if ! grep -Pq "^HiddenServiceDir .*" "/etc/tor/torrc"; then
-        echo "HiddenServiceDir /var/lib/tor/treehouses" >> /etc/tor/torrc
+      if ! grep -Pq "^HiddenServiceDir .*" "$tordir"; then
+        echo "HiddenServiceDir /var/lib/tor/treehouses" >> $tordir
       fi
 
       start_service tor
@@ -121,7 +122,7 @@ function tor {
 
     destroy)
       stop_service tor
-      echo > /etc/tor/torrc
+      echo > $tordir
       rm -rf /var/lib/tor/treehouses
 
       echo "Success: the tor service has been destroyed"
@@ -172,7 +173,7 @@ function tor {
           ;;
         now)
           line1=$(</var/lib/tor/treehouses/hostname)
-          line2=$(grep ^HiddenServicePort /etc/tor/torrc | cut -f 2- -d ' ' | sed -r 's/(.*?) 127.0.0.1:(.*?)/\1:\2/g' | tac | tr -d '\n')
+          line2=$(grep ^HiddenServicePort $tordir | cut -f 2- -d ' ' | sed -r 's/(.*?) 127.0.0.1:(.*?)/\1:\2/g' | tac | tr -d '\n')
           line3="\`$(date -u +"%Y-%m-%d %H:%M:%S %Z")\` $(treehouses networkmode)"
           feedback "$line1\n$line2\n$line3"
           ;;
@@ -195,10 +196,10 @@ function tor {
       ;;
 
     refresh)
-      cp /etc/tor/torrc /etc/tor/torrc_backup
+      cp $tordir $tordir_backup
       treehouses tor destroy
       treehouses tor start
-      mv /etc/tor/torrc_backup /etc/tor/torrc
+      mv $tordir_backup $tordir
       echo "Success: the tor service has been refreshed"
       ;;
 
