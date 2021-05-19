@@ -10,7 +10,7 @@ function tor {
   if { [ ! -d "/var/lib/tor/treehouses" ] || [ ! -f "$tortree" ]; } && [ "$1" != "start" ] && [ "$1" != "add" ]; then
     if [ -z "$(grep -Poi "^HiddenServicePort \\K(.*) 127.0.0.1:(.*)\\b" $tordir | tac | sed -r 's/(.*?)127.0.0.1:(.*?)/\1 <=> \2/g')" ]; then
       echo "Error: there are no tor ports added."
-      echo "'$BASENAME add [localPort]' to add a port and be able to use the service"
+      echo "'$BASENAME tor add [localPort]' to add a port and be able to use the service"
     else
       echo "Error: the tor service has not been configured."
       echo "Run '$BASENAME tor start' to configure it."
