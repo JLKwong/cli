@@ -5,9 +5,10 @@ function tor {
   check_missing_binary "tor"
   check_missing_binary "curl"
   tordir="/usr/local/etc/tor/torrc"
-  tortree="/usr/local/var/lib/tor"
+  tortree="/usr/local/var/lib/tor/treehouses"
+  tortreehost="$tortree/hostname"
 
-  if { [ ! -d "/var/lib/tor/treehouses" ] || [ ! -f "$tortree" ]; } && [ "$1" != "start" ] && [ "$1" != "add" ]; then
+  if { [ ! -d "$tortree" ] || [ ! -f "$tortreehost" ]; } && [ "$1" != "start" ] && [ "$1" != "add" ]; then
     if [ -z "$(grep -Poi "^HiddenServicePort \\K(.*) 127.0.0.1:(.*)\\b" $tordir | tac | sed -r 's/(.*?)127.0.0.1:(.*?)/\1 <=> \2/g')" ]; then
       echo "Error: there are no tor ports added."
       echo "'$BASENAME tor add [localPort]' to add a port and be able to use the service"
@@ -19,7 +20,7 @@ function tor {
   fi
 
   if [ -z "$1" ]; then
-    cat "$tortree"
+    cat "$tortreehost"
     exit 0
   fi
 
@@ -40,7 +41,7 @@ function tor {
 
     add)
       if ! grep -Pq "^HiddenServiceDir .*" "$tordir"; then
-        echo "HiddenServiceDir /var/lib/tor/treehouses" >> $tordir
+        echo "HiddenServiceDir $tortree" >> $tordir
       fi
 
       port="$2"
@@ -115,14 +116,14 @@ function tor {
       ;;
 
     start)
-      if [ ! -d "/var/lib/tor/treehouses" ]; then
-        mkdir "/var/lib/tor/treehouses"
-        chown debian-tor:debian-tor /var/lib/tor/treehouses
-        chmod 700 /var/lib/tor/treehouses
+      if [ ! -d "$tortree" ]; then
+        mkdir "$tortree"
+        chown debian-tor:debian-tor $tortree
+        chmod 700 $tortree
       fi
 
       if ! grep -Pq "^HiddenServiceDir .*" "$tordir"; then
-        echo "HiddenServiceDir /var/lib/tor/treehouses" >> $tordir
+        echo "HiddenServiceDir $tortree" >> $tordir
       fi
 
       #start_service tor
@@ -134,7 +135,7 @@ function tor {
       #stop_service tor
       brew services stop tor
       echo > $tordir
-      rm -rf /var/lib/tor/treehouses
+      rm -rf $tortree
 
       echo "Success: the tor service has been destroyed"
       ;;
@@ -145,7 +146,7 @@ function tor {
         on)
           cp "$TEMPLATES/network/tor_report.sh" /etc/tor_report.sh
           if [ ! -f "/etc/cron.d/tor_report" ]; then
-            echo "*/1 * * * * root if [ -d \"/var/lib/tor/treehouses\" ]; then /etc/tor_report.sh; fi" > /etc/cron.d/tor_report
+            echo "*/1 * * * * root if [ -d \"$tortree\" ]; then /etc/tor_report.sh; fi" > /etc/cron.d/tor_report
           fi
           if [ ! -f "/etc/tor_report_channels.txt" ]; then
             echo "https://api.gitter.im/v1/rooms/5ba5af3cd73408ce4fa8fcfb/chatMessages" >> /etc/tor_report_channels.txt
@@ -183,7 +184,7 @@ function tor {
           echo "OK."
           ;;
         now)
-          line1=$(<$tortree)
+          line1=$(<$tortreehost)
           line2=$(grep ^HiddenServicePort $tordir | cut -f 2- -d ' ' | sed -r 's/(.*?) 127.0.0.1:(.*?)/\1:\2/g' | tac | tr -d '\n')
           line3="\`$(date -u +"%Y-%m-%d %H:%M:%S %Z")\` $(treehouses networkmode)"
           feedback "$line1\n$line2\n$line3"
@@ -208,8 +209,8 @@ function tor {
 
     refresh)
       cp $tordir $tordir_backup
-      treehouses tor destroy
-      treehouses tor start
+      tor destroy
+      tor start
       mv $tordir_backup $tordir
       echo "Success: the tor service has been refreshed"
       ;;
