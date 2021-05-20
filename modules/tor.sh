@@ -16,7 +16,9 @@ function tor {
       echo "Error: the tor service has not been configured."
       echo "Run '$BASENAME tor start' to configure it."
     fi
+    echo "hello jamie"
     exit 1
+    echo "hello eimaj"
   fi
 
   if [ -z "$1" ]; then
