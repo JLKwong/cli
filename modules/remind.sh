@@ -1,6 +1,7 @@
 #!/bin/bash
 
 function remind () {
+  checks=0
   while true; do
   #Reminder=$(echo "\"Deaf & Hard of Hearing Community (and Allies)\" \"staff-bot\" \"@here It's been 2 hours! Please send bump to support this server. :pleading_face: Each successful bump averages about 1 new member.\"")
     LastMessage=$(message discord read "Deaf & Hard of Hearing Community (and Allies)" "staff-bot" | grep -m1 "" | sed 's/^"\(.*\)"$/\1/')
@@ -12,11 +13,17 @@ function remind () {
   #LastMessage="!bump"
   #Reminder="\"Deaf & Hard of Hearing Community (and Allies)\" \"staff-bot\" \"@here It's been 2 hours! Please send bump to support this server. :pleading_face: Each successful bump averages about 1 new member.\""
   #echo "  Reminder:  $Reminder"
-    if [ "$LastMessage" == "!bump" ]; then
-      message discord send "Deaf & Hard of Hearing Community (and Allies)" "staff-bot" '@here It has been 2 hours! Please send `!d bump` to support this server. :pleading_face: Each successful bump averages about 1 new member.'
-    else
+    if [ "$LastMessage" == "!bump" && $checks <= 1 ]; then
+      if [ $checks <= 0 ]; then
+        message discord send "Deaf & Hard of Hearing Community (and Allies)" "staff-bot" '@here It has been 2 hours! Please send `!d bump` to support this server. :pleading_face: Each successful bump averages about 1 new member.'
+      fi
+      checks=$((checks + 1))
+    elif [ "$LastMessage" == *"!bump"* ]; then
       message discord send "Deaf & Hard of Hearing Community (and Allies)" "staff-bot" '@here asdfiovjiaosemre :pensive: Please send `!d bump`. :pleading_face: Over 6 hours have passed already. :pensive:'
+    else
+      sleep $(( ( RANDOM % 275 ) + ( RANDOM % 275 ) + ( RANDOM % 275 ) + ( RANDOM % 275 ) ))
+      message discord send "Deaf & Hard of Hearing Community (and Allies)" "staff-bot" '!d bump'
     fi
-    sleep 5
+    sleep $(( ( RANDOM % 3 ) + ( RANDOM % 3 ) + 1 ))
   done
 }
