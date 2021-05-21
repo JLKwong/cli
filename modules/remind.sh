@@ -13,11 +13,10 @@ function remind () {
   #LastMessage="!bump"
   #Reminder="\"Deaf & Hard of Hearing Community (and Allies)\" \"staff-bot\" \"@here It's been 2 hours! Please send bump to support this server. :pleading_face: Each successful bump averages about 1 new member.\""
   #echo "  Reminder:  $Reminder"
-    if [ "$LastMessage" == "!bump" ] && [ $checks <= 1 ]; then
+    if [ "$LastMessage" == "!bump" ] || [ "$checks" -lt "6" ]; then
       if [ $checks <= 0 ]; then
         message discord send "Deaf & Hard of Hearing Community (and Allies)" "staff-bot" '@here It has been 2 hours! Please send `!d bump` to support this server. :pleading_face: Each successful bump averages about 1 new member.'
       fi
-      checks=$((checks + 1))
     elif [ "$LastMessage" == *"!bump"* ]; then
       message discord send "Deaf & Hard of Hearing Community (and Allies)" "staff-bot" '@here asdfiovjiaosemre :pensive: Please send `!d bump`. :pleading_face: Over 6 hours have passed already. :pensive:'
     else
@@ -25,6 +24,7 @@ function remind () {
       #message discord send "Deaf & Hard of Hearing Community (and Allies)" "staff-bot" '!d bump'
       echo "test"
     fi
-    sleep $(( ( RANDOM % 3 ) + ( RANDOM % 3 ) + 1 ))
+    checks=$((checks + 1))
+    sleep 1375
   done
 }
