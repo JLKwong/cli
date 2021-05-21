@@ -6,6 +6,6 @@ function remind () {
   echo $Reminder
   message discord send $Reminder
   if [ "$LastMessage" == "!bump" ]; then
-    message discord send $Reminder
+    message discord send "$Reminder"
   fi
 }
