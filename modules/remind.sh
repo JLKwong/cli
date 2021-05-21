@@ -14,7 +14,7 @@ function remind () {
   #Reminder="\"Deaf & Hard of Hearing Community (and Allies)\" \"staff-bot\" \"@here It's been 2 hours! Please send bump to support this server. :pleading_face: Each successful bump averages about 1 new member.\""
   #echo "  Reminder:  $Reminder"
     if [ "$LastMessage" == "!bump" ] || [ "$checks" -lt "6" ]; then
-      if [ $checks <= 0 ]; then
+      if [ "$checks" -lt "0" ]; then
         message discord send "Deaf & Hard of Hearing Community (and Allies)" "staff-bot" '@here It has been 2 hours! Please send `!d bump` to support this server. :pleading_face: Each successful bump averages about 1 new member.'
       fi
     elif [ "$LastMessage" == *"!bump"* ]; then
