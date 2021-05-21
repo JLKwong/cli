@@ -5,6 +5,7 @@ function remind () {
   LastMessage=$(message discord read "Deaf & Hard of Hearing Community (and Allies)" "staff-bot" | grep -m1 "")
   echo "Last Message $LastMessage"
   if [ "$LastMessage" = "!bump" ]; then
+    echo "  conditional true"
     message discord send $Reminder
   fi
 }
