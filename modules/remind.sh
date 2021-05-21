@@ -14,6 +14,6 @@ function remind () {
   if [ "$LastMessage" == "!bump" ]; then
     message discord send "Deaf & Hard of Hearing Community (and Allies)" "staff-bot" '@here It has been 2 hours! Please send `!d bump` to support this server. :pleading_face: Each successful bump averages about 1 new member.'
   else
-    message discord send "Deaf & Hard of Hearing Community (and Allies)" "staff-bot" '@here It has been 6 hours! :pensive: Please send `!d bump` to support this server. :pleading_face: Each successful bump averages about 1 new member.'
+    message discord send "Deaf & Hard of Hearing Community (and Allies)" "staff-bot" '@here asdfiovjiaosemre:pensive: Please send `!d bump`. :pleading_face: Over 6 hours have passed already. :pensive:'
   fi
 }
